@@ -4,11 +4,8 @@
 # Allow all C# scripts
 !**/*.cs
 
-# Allow the meta files so Unity doesn't break
-!**/*.meta
-
 # Allow the gitignore file itself
 !.gitignore
 
-# Allow the README file you just created
+# Allow the README file
 !README.md
