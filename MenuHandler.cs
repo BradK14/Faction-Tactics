@@ -138,6 +138,9 @@ public class MenuHandler : MonoBehaviour
     public void CreateSessionBackButton()
     {
         createSessionMenu.SetActive(false);
+        sessionNameInput.text = "";
+        mapDropdown.value = 0;
+        timerToggle.isOn = true;
         multiplayerMenu.SetActive(true);
     }
 
@@ -150,6 +153,11 @@ public class MenuHandler : MonoBehaviour
     public void SessionPrepBackButton()
     {
         sessionPrepMenu.SetActive(false);
+
+        // Reset session information for the create session menu
+        sessionNameInput.text = "";
+        mapDropdown.value = 0;
+        timerToggle.isOn = true;
 
         serverManager.RemovePlayer();
         _ = LeaveSessionAsync();
