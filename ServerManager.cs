@@ -11,6 +11,7 @@ public class ServerManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        Debug.Log("OnNetworkSpawn Called");
         // TODO: Something seems to go wrong in this function
         menuHandler = FindAnyObjectByType<MenuHandler>();
         menuHandler.SetServerManager(this);

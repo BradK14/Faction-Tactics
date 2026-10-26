@@ -27,7 +27,8 @@ public class NetManager : MonoBehaviour
 
     private void OnClientDisconnect(ulong clientId)
     {
-        if (!NetworkManager.Singleton.IsServer)
+        // If the server has left hit the back button
+        if (!NetworkManager.Singleton.IsServer && clientId != NetworkManager.Singleton.LocalClientId)  // Only when you are not the server and the client that left is not you
         {
             menuHandler.SessionPrepBackButton();
         }
