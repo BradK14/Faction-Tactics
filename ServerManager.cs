@@ -5,13 +5,20 @@ using UnityEngine;
 
 public class ServerManager : NetworkBehaviour
 {
+    // FixedString32Bytes has a max of 30 characters
     private NetworkVariable<Dictionary<FixedString32Bytes, bool>> playersReady = new NetworkVariable<Dictionary<FixedString32Bytes, bool>>();  // TODO: Making this variable public changes its behaviour for some reason
     private MenuHandler menuHandler;
     private string playerName; // TEMPORARY SIMPLE SOLUTION TO NAMING A PLAYER
 
     public override void OnNetworkSpawn()
     {
-        Debug.Log("OnNetworkSpawn Called");
+        // Create a unique ID if none is found
+        if (!PlayerPrefs.HasKey("GUID"))
+        {
+            PlayerPrefs.SetString("GUID", System.Guid.NewGuid().ToString());
+            PlayerPrefs.Save();
+        }
+
         // TODO: Something seems to go wrong in this function
         menuHandler = FindAnyObjectByType<MenuHandler>();
         menuHandler.SetServerManager(this);
