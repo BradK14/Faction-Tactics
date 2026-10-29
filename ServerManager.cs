@@ -65,7 +65,29 @@ public class ServerManager : NetworkBehaviour
 
         playersReady.Value[$"Player {id + 1}"] = r;
 
-        // TODO: Check if lobby is full and all players are ready then start the game (load the next scene)
+        // Check if lobby is full and all players are ready then start the game (load the next scene)
+        if (playersReady.Value.Count == 2)
+        {
+            bool ready = true;
+            for (int i = 0; i < playersReady.Value.Count; i++)
+            {
+                if (!playersReady.Value[$"Player {i + 1}"])
+                {
+                    ready = false;
+                    break;
+                }
+            }
+
+            if (ready)
+            {
+                var sceneLoadStatus = NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+                if (sceneLoadStatus != SceneEventProgressStatus.Started)
+                {
+                    Debug.LogWarning($"Failed to load scene: {sceneLoadStatus}");
+                }
+            }
+        }
     }
 
     [Rpc(SendTo.ClientsAndHost)]
