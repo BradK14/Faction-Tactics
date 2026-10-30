@@ -19,7 +19,6 @@ public class ServerManager : NetworkBehaviour
             PlayerPrefs.Save();
         }
 
-        // TODO: Something seems to go wrong in this function
         menuHandler = FindAnyObjectByType<MenuHandler>();
         menuHandler.SetServerManager(this);
 

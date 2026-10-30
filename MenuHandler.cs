@@ -162,15 +162,6 @@ public class MenuHandler : MonoBehaviour
         mapDropdown.value = 0;
         timerToggle.isOn = true;
 
-        if (serverManager == null)
-        {
-            Debug.Log("No Server Manager");
-        }
-        else
-        {
-            Debug.Log("Server Manager Present");
-        }
-
         serverManager.RemovePlayer();
         _ = LeaveSessionAsync();
     }
@@ -288,7 +279,6 @@ public class MenuHandler : MonoBehaviour
 
     public void SyncPlayerText(Dictionary<FixedString32Bytes, bool> players)
     {
-        Debug.Log($"players count = {players.Count}");
         Dictionary<FixedString32Bytes, bool> newPlayers = new Dictionary<FixedString32Bytes, bool>(players);
 
         foreach (TMP_Text text in playerTexts)
