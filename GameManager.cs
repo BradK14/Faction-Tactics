@@ -3,6 +3,10 @@ using Unity.Netcode;
 
 public class GameManager : NetworkBehaviour
 {
+    // Variables
+    [SerializeField] private Camera mainCamera;
+
+    // Functions
     private void Start()
     {
         if (NetworkManager.Singleton != null)
@@ -21,6 +25,15 @@ public class GameManager : NetworkBehaviour
         {
             // Spawn player objects, units, structures, then camera
             Debug.Log("All clients here");
+
+            CamerasOnRpc();
         }
+    }
+
+    // RPCs
+    [Rpc(SendTo.ClientsAndHost)]
+    private void CamerasOnRpc()
+    {
+        mainCamera.enabled = true;
     }
 }
