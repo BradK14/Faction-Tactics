@@ -4,7 +4,7 @@ using Unity.Netcode;
 public class GameManager : NetworkBehaviour
 {
     // Variables
-    [SerializeField] private Camera mainCamera;
+    [SerializeField] private GameObject loadOverlay;
 
     // Functions
     private void Start()
@@ -26,14 +26,24 @@ public class GameManager : NetworkBehaviour
             // Spawn player objects, units, structures, then camera
             Debug.Log("All clients here");
 
-            CamerasOnRpc();
+            LoadScene();
         }
+    }
+
+    private async void LoadScene()
+    {
+        // Map
+        // Delay to test
+        await Awaitable.WaitForSecondsAsync(5.0f);
+
+        // Drop the load overlay
+        RemoveLoadOverlayRpc();
     }
 
     // RPCs
     [Rpc(SendTo.ClientsAndHost)]
-    private void CamerasOnRpc()
+    private void RemoveLoadOverlayRpc()
     {
-        mainCamera.enabled = true;
+        loadOverlay.SetActive(false);
     }
 }
