@@ -26,7 +26,7 @@ public class MapDesignerWindow : EditorWindow
             if (GUILayout.Button("Create New Map Design Asset"))
             {
                 MapDesignContainer newAsset = CreateInstance<MapDesignContainer>();
-                AssetDatabase.CreateAsset(newAsset, "Assets/NewMapDesign.asset");
+                AssetDatabase.CreateAsset(newAsset, "Assets/ScriptableObjects/NewMapDesign.asset");
                 AssetDatabase.SaveAssets();
                 designData = newAsset;
             }
@@ -40,10 +40,10 @@ public class MapDesignerWindow : EditorWindow
         EditorGUILayout.BeginHorizontal();
 
         // 2. LEFT SIDE: Draw the Visual Grid Selection Matrix
-        EditorGUILayout.BeginVertical(GUILayout.Width(300));
+        EditorGUILayout.BeginVertical(GUILayout.Width(900));
         GUILayout.Label("Click a cell to edit its properties:", EditorStyles.miniLabel);
 
-        scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(400));
+        scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(900));
         for (int y = designData.height - 1; y >= 0; y--)
         {
             EditorGUILayout.BeginHorizontal();
@@ -97,26 +97,5 @@ public class MapDesignerWindow : EditorWindow
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.EndHorizontal();
-
-        // 4. EXPORT BUTTON
-        GUILayout.Space(20);
-        if (GUILayout.Button("Export Map to JSON for Server", GUILayout.Height(40)))
-        {
-            ExportToJsonFile();
-        }
-    }
-
-    private void ExportToJsonFile()
-    {
-        // Formats data perfectly with pretty formatting indents
-        string jsonOutput = JsonUtility.ToJson(designData, true);
-
-        string targetPath = EditorUtility.SaveFilePanel("Save Server Map JSON", "", "server_map_data.json", "json");
-
-        if (!string.IsNullOrEmpty(targetPath))
-        {
-            File.WriteAllText(targetPath, jsonOutput);
-            Debug.Log($"Successfully exported unique tile matrix properties to: {targetPath}");
-        }
     }
 }
