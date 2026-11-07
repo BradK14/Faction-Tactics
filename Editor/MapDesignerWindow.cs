@@ -1,11 +1,15 @@
 using UnityEngine;
 using UnityEditor;
+using System.IO;
 
 public class MapDesignerWindow : EditorWindow
 {
     private MapData designData;
     private Vector2 scrollPosition;
     private int selectedIndex = -1;
+    private string mapName = "NewMapDesign";
+    private int mapHeight = 10;
+    private int mapWidth = 10;
 
     [MenuItem("Tools/Map Designer")]
     public static void ShowWindow()
@@ -15,19 +19,49 @@ public class MapDesignerWindow : EditorWindow
 
     private void OnGUI()
     {
-        GUILayout.Label("Map Design Exporter", EditorStyles.boldLabel);
-
         // 1. Assign or create a working file
-        designData = (MapData)EditorGUILayout.ObjectField("Design Data Asset", designData, typeof(MapData), false);
+        designData = (MapData)EditorGUILayout.ObjectField("Current Map:", designData, typeof(MapData), false);
 
         if (designData == null)
         {
-            if (GUILayout.Button("Create New Map Design Asset"))
+            // Draw input fields for user configuration
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Map Configuration", EditorStyles.boldLabel);
+
+            mapName = EditorGUILayout.TextField("Map Name", mapName);
+            mapWidth = EditorGUILayout.IntField("Width", mapWidth);
+            mapHeight = EditorGUILayout.IntField("Height", mapHeight);
+
+            // Ensure the width and height are in a valid (and not rediculous) range
+            mapWidth = Mathf.Clamp(mapWidth, 3, 30);
+            mapHeight = Mathf.Clamp(mapHeight, 3, 30);
+
+            EditorGUILayout.Space();
+
+            if (GUILayout.Button("Create New Map"))
             {
-                MapData newAsset = CreateInstance<MapData>();
-                AssetDatabase.CreateAsset(newAsset, "Assets/ScriptableObjects/NewMapDesign.asset");
+                // Ensure the target directory exists
+                if (!Directory.Exists("Assets/ScriptableObjects"))
+                {
+                    Directory.CreateDirectory("Assets/ScriptableObjects");
+                }
+
+                // Create an empty map
+                MapData newMap = CreateInstance<MapData>();
+
+                // Set the map's height and width
+                newMap.width = mapWidth;
+                newMap.height = mapHeight;
+
+                // Set name, use a default name for a fall back.  
+                string safeMapName = string.IsNullOrEmpty(mapName) ? "NewMapDesign" : mapName;
+
+                string mapPath = $"Assets/ScriptableObjects/{safeMapName}.asset";
+                mapPath = AssetDatabase.GenerateUniqueAssetPath(mapPath);
+
+                AssetDatabase.CreateAsset(newMap, mapPath);
                 AssetDatabase.SaveAssets();
-                designData = newAsset;
+                designData = newMap;
             }
             return;
         }
@@ -40,7 +74,7 @@ public class MapDesignerWindow : EditorWindow
 
         // 2. LEFT SIDE: Draw the Visual Grid Selection Matrix
         EditorGUILayout.BeginVertical(GUILayout.Width(900));
-        GUILayout.Label("Click a cell to edit its properties:", EditorStyles.miniLabel);
+        GUILayout.Label("Click a tile to edit its properties:", EditorStyles.miniLabel);
 
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(900));
         for (int y = designData.height - 1; y >= 0; y--)
@@ -52,7 +86,7 @@ public class MapDesignerWindow : EditorWindow
                 designData.tiles[index].x = x;
                 designData.tiles[index].y = y;
 
-                // Color code button states based on passability/type
+                // Color code button states
                 Color originalColor = GUI.color;
                 if (index == selectedIndex) GUI.color = Color.green;
 
@@ -102,7 +136,7 @@ public class MapDesignerWindow : EditorWindow
         }
         else
         {
-            GUILayout.Label("Select a tile on the left grid to configure properties.");
+            GUILayout.Label("Select a tile on the map to configure properties.");
         }
         EditorGUILayout.EndVertical();
 
