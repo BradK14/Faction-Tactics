@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEditor;
-using System.IO;
 
 public class MapDesignerWindow : EditorWindow
 {
-    private MapDesignContainer designData;
+    private MapData designData;
     private Vector2 scrollPosition;
     private int selectedIndex = -1;
 
@@ -19,13 +18,13 @@ public class MapDesignerWindow : EditorWindow
         GUILayout.Label("Map Design Exporter", EditorStyles.boldLabel);
 
         // 1. Assign or create a working file
-        designData = (MapDesignContainer)EditorGUILayout.ObjectField("Design Data Asset", designData, typeof(MapDesignContainer), false);
+        designData = (MapData)EditorGUILayout.ObjectField("Design Data Asset", designData, typeof(MapData), false);
 
         if (designData == null)
         {
             if (GUILayout.Button("Create New Map Design Asset"))
             {
-                MapDesignContainer newAsset = CreateInstance<MapDesignContainer>();
+                MapData newAsset = CreateInstance<MapData>();
                 AssetDatabase.CreateAsset(newAsset, "Assets/ScriptableObjects/NewMapDesign.asset");
                 AssetDatabase.SaveAssets();
                 designData = newAsset;
@@ -35,7 +34,7 @@ public class MapDesignerWindow : EditorWindow
 
         // Synchronize grid size
         int totalCells = designData.width * designData.height;
-        while (designData.tiles.Count < totalCells) designData.tiles.Add(new SerializableTile());
+        while (designData.tiles.Count < totalCells) designData.tiles.Add(new TileData());
 
         EditorGUILayout.BeginHorizontal();
 
@@ -55,8 +54,7 @@ public class MapDesignerWindow : EditorWindow
 
                 // Color code button states based on passability/type
                 Color originalColor = GUI.color;
-                if (index == selectedIndex) GUI.color = Color.yellow;
-                else if (!designData.tiles[index].isPassable) GUI.color = Color.red;
+                if (index == selectedIndex) GUI.color = Color.green;
 
                 if (GUILayout.Button($"{x},{y}", GUILayout.Width(45), GUILayout.Height(45)))
                 {
@@ -73,19 +71,31 @@ public class MapDesignerWindow : EditorWindow
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
         if (selectedIndex >= 0 && selectedIndex < designData.tiles.Count)
         {
-            SerializableTile tile = designData.tiles[selectedIndex];
+            TileData tile = designData.tiles[selectedIndex];
             GUILayout.Label($"Editing Tile ({tile.x}, {tile.y})", EditorStyles.boldLabel);
+            tile.cliffNorth = EditorGUILayout.Toggle("Cliff North", tile.cliffNorth);
+            tile.cliffEast = EditorGUILayout.Toggle("Cliff East", tile.cliffEast);
+            tile.cliffSouth = EditorGUILayout.Toggle("Cliff South", tile.cliffSouth);
+            tile.cliffWest = EditorGUILayout.Toggle("Cliff West", tile.cliffWest);
+            tile.resourceType = (TileData.ResourceType)EditorGUILayout.EnumPopup("Resource Type", tile.resourceType);
+            tile.startingStructure = (TileData.StartingStructure)EditorGUILayout.EnumPopup("Structure", tile.startingStructure);
+            if (tile.startingStructure != TileData.StartingStructure.None)
+            {
+                EditorGUI.indentLevel++;
 
-            tile.tileName = EditorGUILayout.TextField("Tile Name", tile.tileName);
-            tile.terrainType = (byte)EditorGUILayout.IntField("Terrain Type ID", tile.terrainType);
-            tile.isPassable = EditorGUILayout.Toggle("Is Passable?", tile.isPassable);
+                tile.startingStructurePlayer = EditorGUILayout.IntField("Player:", tile.startingStructurePlayer);
 
-            tile.maxHealth = EditorGUILayout.IntField("Max Health", tile.maxHealth);
-            tile.currentHealth = (int)EditorGUILayout.Slider("Current Health", tile.currentHealth, 0, tile.maxHealth);
+                EditorGUI.indentLevel--;
+            }
+            tile.startingUnit = (TileData.StartingUnit)EditorGUILayout.EnumPopup("Unit", tile.startingUnit);
+            if (tile.startingUnit != TileData.StartingUnit.None)
+            {
+                EditorGUI.indentLevel++;
 
-            tile.factionOwner = EditorGUILayout.TextField("Faction Owner", tile.factionOwner);
-            tile.remainingResources = EditorGUILayout.IntField("Resources Remaining", tile.remainingResources);
-            tile.trapDamage = EditorGUILayout.IntField("Trap Damage Pool", tile.trapDamage);
+                tile.startingUnitPlayer = EditorGUILayout.IntField("Player:", tile.startingUnitPlayer);
+
+                EditorGUI.indentLevel--;
+            }
 
             // Mark object dirty so Unity updates changes automatically
             EditorUtility.SetDirty(designData);
