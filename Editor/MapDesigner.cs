@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-public class MapDesignerWindow : EditorWindow
+public class MapDesigner : EditorWindow
 {
     private MapData designData;
     private Vector2 scrollPosition;
@@ -14,7 +14,7 @@ public class MapDesignerWindow : EditorWindow
     [MenuItem("Tools/Map Designer")]
     public static void ShowWindow()
     {
-        GetWindow<MapDesignerWindow>("Map Designer");
+        GetWindow<MapDesigner>("Map Designer");
     }
 
     private void OnGUI()
@@ -72,14 +72,25 @@ public class MapDesignerWindow : EditorWindow
 
         EditorGUILayout.BeginHorizontal();
 
-        // 2. LEFT SIDE: Draw the Visual Grid Selection Matrix
+        // LEFT SIDE: Draw the Visual Grid Selection Matrix
         EditorGUILayout.BeginVertical(GUILayout.Width(900));
         GUILayout.Label("Click a tile to edit its properties:", EditorStyles.miniLabel);
 
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(900));
+
+        // Create a custom style for the tiles to remove internal padding and margins
+        GUIStyle tileStyle = new GUIStyle(GUI.skin.button);
+        tileStyle.margin = new RectOffset(0, 0, 0, 0);
+        tileStyle.padding = new RectOffset(0, 0, 0, 0);
+
+        // Create a custom style for the horizontal layout to eliminate spacing between columns
+        GUIStyle rowStyle = new GUIStyle(GUI.skin.box);
+        rowStyle.margin = new RectOffset(0, 0, 0, 0);
+        rowStyle.padding = new RectOffset(0, 0, 0, 0);
+
         for (int y = designData.height - 1; y >= 0; y--)
         {
-            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginHorizontal(rowStyle);
             for (int x = 0; x < designData.width; x++)
             {
                 int index = y * designData.width + x;
@@ -90,7 +101,7 @@ public class MapDesignerWindow : EditorWindow
                 Color originalColor = GUI.color;
                 if (index == selectedIndex) GUI.color = Color.green;
 
-                if (GUILayout.Button($"{x},{y}", GUILayout.Width(45), GUILayout.Height(45)))
+                if (GUILayout.Button($"{x},{y}", tileStyle, GUILayout.Width(45), GUILayout.Height(45)))
                 {
                     selectedIndex = index;
                 }
@@ -107,6 +118,8 @@ public class MapDesignerWindow : EditorWindow
         {
             TileData tile = designData.tiles[selectedIndex];
             GUILayout.Label($"Editing Tile ({tile.x}, {tile.y})", EditorStyles.boldLabel);
+            tile.elevation = EditorGUILayout.IntField("Elevation", tile.elevation);
+            tile.elevation = Mathf.Clamp(tile.elevation, 1, 5);
             tile.cliffNorth = EditorGUILayout.Toggle("Cliff North", tile.cliffNorth);
             tile.cliffEast = EditorGUILayout.Toggle("Cliff East", tile.cliffEast);
             tile.cliffSouth = EditorGUILayout.Toggle("Cliff South", tile.cliffSouth);
@@ -118,6 +131,7 @@ public class MapDesignerWindow : EditorWindow
                 EditorGUI.indentLevel++;
 
                 tile.startingStructurePlayer = EditorGUILayout.IntField("Player:", tile.startingStructurePlayer);
+                tile.startingStructurePlayer = Mathf.Clamp(tile.startingStructurePlayer, 1, 2);
 
                 EditorGUI.indentLevel--;
             }
@@ -127,6 +141,7 @@ public class MapDesignerWindow : EditorWindow
                 EditorGUI.indentLevel++;
 
                 tile.startingUnitPlayer = EditorGUILayout.IntField("Player:", tile.startingUnitPlayer);
+                tile.startingUnitPlayer = Mathf.Clamp(tile.startingUnitPlayer, 1, 2);
 
                 EditorGUI.indentLevel--;
             }
