@@ -4,7 +4,7 @@ using System.IO;
 
 public class MapDesigner : EditorWindow
 {
-    private MapData designData;
+    private MapData mapData;
     private Vector2 scrollPosition;
     private int selectedIndex = -1;
     private string mapName = "NewMapDesign";
@@ -19,10 +19,10 @@ public class MapDesigner : EditorWindow
 
     private void OnGUI()
     {
-        // 1. Assign or create a working file
-        designData = (MapData)EditorGUILayout.ObjectField("Current Map:", designData, typeof(MapData), false);
+        // Assign or create a working file
+        mapData = (MapData)EditorGUILayout.ObjectField("Current Map:", mapData, typeof(MapData), false);
 
-        if (designData == null)
+        if (mapData == null)
         {
             // Draw input fields for user configuration
             EditorGUILayout.Space();
@@ -61,14 +61,14 @@ public class MapDesigner : EditorWindow
 
                 AssetDatabase.CreateAsset(newMap, mapPath);
                 AssetDatabase.SaveAssets();
-                designData = newMap;
+                mapData = newMap;
             }
             return;
         }
 
         // Synchronize grid size
-        int totalCells = designData.width * designData.height;
-        while (designData.tiles.Count < totalCells) designData.tiles.Add(new TileData());
+        int totalCells = mapData.width * mapData.height;
+        while (mapData.tiles.Count < totalCells) mapData.tiles.Add(new TileData());
 
         EditorGUILayout.BeginHorizontal();
 
@@ -78,26 +78,59 @@ public class MapDesigner : EditorWindow
 
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(900));
 
-        // Create a custom style for the tiles to remove internal padding and margins
-        GUIStyle tileStyle = new GUIStyle(GUI.skin.button);
-        tileStyle.margin = new RectOffset(0, 0, 0, 0);
-        tileStyle.padding = new RectOffset(0, 0, 0, 0);
+        float tileSize = 45f;
 
-        // Create a custom style for the horizontal layout to eliminate spacing between columns
-        GUIStyle rowStyle = new GUIStyle(GUI.skin.box);
-        rowStyle.margin = new RectOffset(0, 0, 0, 0);
-        rowStyle.padding = new RectOffset(0, 0, 0, 0);
+        // Custom style to eliminate spacing between tiles
+        GUIStyle removedDefaultStyle = new GUIStyle(GUI.skin.box);
+        removedDefaultStyle.margin = new RectOffset(0, 0, 0, 0);
+        removedDefaultStyle.padding = new RectOffset(0, 0, 0, 0);
+        removedDefaultStyle.border = new RectOffset(0, 0, 0, 0);
 
-        for (int y = designData.height - 1; y >= 0; y--)
+        for (int y = mapData.height - 1; y >= 0; y--)
         {
-            EditorGUILayout.BeginHorizontal(rowStyle);
-            for (int x = 0; x < designData.width; x++)
+            EditorGUILayout.BeginHorizontal(removedDefaultStyle);
+            for (int x = 0; x < mapData.width; x++)
             {
-                int index = y * designData.width + x;
-                designData.tiles[index].x = x;
-                designData.tiles[index].y = y;
+                int index = y * mapData.width + x;
+                mapData.tiles[index].x = x;
+                mapData.tiles[index].y = y;
 
+                // Reserve a fixed-size layout rect for this tile
+                Rect tileRect = EditorGUILayout.GetControlRect(false, tileSize, removedDefaultStyle, GUILayout.Width(tileSize));
+
+                // Draw each layer of the preview
+                // Terrain layer
+                Sprite terrainSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/Terrain/Ground1-1.png");
+                Texture2D terrainTex = terrainSprite.texture;
+                if (mapData.tiles[index].elevation == 1)
+                {
+                    //EditorGUI.DrawPreviewTexture(tileRect, terrainTex, null, ScaleMode.ScaleToFit, 0);
+                    GUI.DrawTexture(tileRect, terrainTex, ScaleMode.ScaleToFit, true);
+                }
+
+                // Cliff layer
+                // You can check data here to decide which texture to draw
+                //Texture2D cliffTex = Resources.Load<Texture2D>("Tiles/TreeOverlay");
+                //if (cliffTex != null)
+                //{
+                //    GUI.DrawTexture(tileRect, cliffTex);
+                //}
+
+                // Resource layer
+                // Structure layer
+                // Unit layer
+                // Selection highlight layer
+                /*
+                if (index == selectedIndex)
+                {
+                    Texture2D selectTex = Resources.Load<Texture2D>("UI/GreenHighlightOverlay");
+                    if (selectTex != null)
+                    {
+                        GUI.DrawTexture(tileRect, selectTex);
+                    }
+                }
                 // Color code button states
+                
                 Color originalColor = GUI.color;
                 if (index == selectedIndex) GUI.color = Color.green;
 
@@ -106,17 +139,24 @@ public class MapDesigner : EditorWindow
                     selectedIndex = index;
                 }
                 GUI.color = originalColor;
+                */
+
+                if (GUI.Button(tileRect, GUIContent.none, GUIStyle.none))
+                {
+                    selectedIndex = index;
+                }
+                
             }
             EditorGUILayout.EndHorizontal();
         }
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
 
-        // 3. RIGHT SIDE: Render the Form Fields for the Selected Tile
+        // RIGHT SIDE: Render the Form Fields for the Selected Tile
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-        if (selectedIndex >= 0 && selectedIndex < designData.tiles.Count)
+        if (selectedIndex >= 0 && selectedIndex < mapData.tiles.Count)
         {
-            TileData tile = designData.tiles[selectedIndex];
+            TileData tile = mapData.tiles[selectedIndex];
             GUILayout.Label($"Editing Tile ({tile.x}, {tile.y})", EditorStyles.boldLabel);
             tile.elevation = EditorGUILayout.IntField("Elevation", tile.elevation);
             tile.elevation = Mathf.Clamp(tile.elevation, 1, 5);
@@ -147,7 +187,7 @@ public class MapDesigner : EditorWindow
             }
 
             // Mark object dirty so Unity updates changes automatically
-            EditorUtility.SetDirty(designData);
+            EditorUtility.SetDirty(mapData);
         }
         else
         {
