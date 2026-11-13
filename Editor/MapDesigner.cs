@@ -100,21 +100,18 @@ public class MapDesigner : EditorWindow
 
                 // Draw each layer of the preview
                 // Terrain layer
-                Sprite terrainSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/Terrain/Ground1-1.png");
-                Texture2D terrainTex = terrainSprite.texture;
-                if (mapData.tiles[index].elevation == 1)
+                Texture2D groundTex = getGroundTexFromTile(mapData.tiles[index]);
+                if (groundTex != null)
                 {
-                    //EditorGUI.DrawPreviewTexture(tileRect, terrainTex, null, ScaleMode.ScaleToFit, 0);
-                    GUI.DrawTexture(tileRect, terrainTex, ScaleMode.ScaleToFit, true);
+                    GUI.DrawTexture(tileRect, groundTex, ScaleMode.ScaleToFit, true);
                 }
 
                 // Cliff layer
-                // You can check data here to decide which texture to draw
-                //Texture2D cliffTex = Resources.Load<Texture2D>("Tiles/TreeOverlay");
-                //if (cliffTex != null)
-                //{
-                //    GUI.DrawTexture(tileRect, cliffTex);
-                //}
+                Texture2D cliffTex = getCliffTexFromTile(mapData.tiles[index]);
+                if (cliffTex != null)
+                {
+                    GUI.DrawTexture(tileRect, cliffTex, ScaleMode.ScaleToFit, true);
+                }
 
                 // Resource layer
                 // Structure layer
@@ -196,5 +193,58 @@ public class MapDesigner : EditorWindow
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.EndHorizontal();
+    }
+
+    private Texture2D getGroundTexFromTile(TileData tile)
+    {
+        Texture2D tex = null;
+
+        tex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Terrain/Ground{tile.elevation}.png").texture;
+
+        return tex;
+    }
+
+    private Texture2D getCliffTexFromTile(TileData tile)
+    {
+        Texture2D tex = null;
+        string n = (tile.cliffNorth) ? "N" : "";
+        string e = (tile.cliffEast) ? "E" : "";
+        string s = (tile.cliffSouth) ? "S" : "";
+        string w = (tile.cliffWest) ? "W" : "";
+        string all = n + e + s + w;
+
+        if (all != "")
+        {
+            tex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Terrain/Cliff{all}.png").texture;
+        }
+
+        return tex;
+    }
+
+    private Texture2D getResourceTexFromTile(TileData tile)
+    {
+        Texture2D tex = null;
+
+        // TODO: Load the correct texture
+
+        return tex;
+    }
+
+    private Texture2D getStructureTexFromTile(TileData tile)
+    {
+        Texture2D tex = null;
+
+        // TODO: Load the correct texture
+
+        return tex;
+    }
+
+    private Texture2D getUnitTexFromTile(TileData tile)
+    {
+        Texture2D tex = null;
+
+        // TODO: Load the correct texture
+
+        return tex;
     }
 }
