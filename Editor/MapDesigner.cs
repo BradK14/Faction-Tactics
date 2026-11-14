@@ -117,27 +117,13 @@ public class MapDesigner : EditorWindow
                 // Structure layer
                 // Unit layer
                 // Selection highlight layer
-                /*
-                if (index == selectedIndex)
+                Texture2D highlightTex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Other/GameCursor.png").texture;
+                if (selectedIndex == index)
                 {
-                    Texture2D selectTex = Resources.Load<Texture2D>("UI/GreenHighlightOverlay");
-                    if (selectTex != null)
-                    {
-                        GUI.DrawTexture(tileRect, selectTex);
-                    }
+                    GUI.DrawTexture(tileRect, highlightTex, ScaleMode.ScaleToFit, true);
                 }
-                // Color code button states
-                
-                Color originalColor = GUI.color;
-                if (index == selectedIndex) GUI.color = Color.green;
 
-                if (GUILayout.Button($"{x},{y}", tileStyle, GUILayout.Width(45), GUILayout.Height(45)))
-                {
-                    selectedIndex = index;
-                }
-                GUI.color = originalColor;
-                */
-
+                // Button Selection
                 if (GUI.Button(tileRect, GUIContent.none, GUIStyle.none))
                 {
                     selectedIndex = index;
