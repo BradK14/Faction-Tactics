@@ -30,4 +30,17 @@ public class MapData : ScriptableObject
     public int width = 10;
     public int height = 10;
     public List<TileData> tiles = new();
+
+    // Access a tile using x, y coordinates
+    public TileData GetTile(int x, int y)
+    {
+        // Return null if out of bounds
+        if (x < 0 || x >= width || y < 0 || y >= height)
+        {
+            return null;
+        }
+
+        int index = y * width + x;
+        return tiles[index];
+    }
 }
