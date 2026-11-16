@@ -114,8 +114,28 @@ public class MapDesigner : EditorWindow
                 }
 
                 // Resource layer
+                
+                Texture2D resourceTex = getResourceTexFromTile(mapData.tiles[index]);
+                if (resourceTex != null)
+                {
+                    GUI.DrawTexture(tileRect, resourceTex, ScaleMode.ScaleToFit, true);
+                }
+                
+
                 // Structure layer
+                Texture2D structureTex = getStructureTexFromTile(mapData.tiles[index]);
+                if (structureTex != null)
+                {
+                    GUI.DrawTexture(tileRect, structureTex, ScaleMode.ScaleToFit, true);
+                }
+
                 // Unit layer
+                Texture2D unitTex = getUnitTexFromTile(mapData.tiles[index]);
+                if (unitTex != null)
+                {
+                    GUI.DrawTexture(tileRect, unitTex, ScaleMode.ScaleToFit, true);
+                }
+
                 // Selection highlight layer
                 Texture2D highlightTex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Other/GameCursor.png").texture;
                 if (selectedIndex == index)
@@ -220,7 +240,10 @@ public class MapDesigner : EditorWindow
     {
         Texture2D tex = null;
 
-        // TODO: Load the correct texture
+        if (tile.startingStructure != TileData.StartingStructure.None)
+        {
+            tex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Structures/{tile.startingStructure}{tile.startingStructurePlayer}-1.png").texture;
+        }
 
         return tex;
     }
@@ -229,7 +252,10 @@ public class MapDesigner : EditorWindow
     {
         Texture2D tex = null;
 
-        // TODO: Load the correct texture
+        if (tile.startingUnit != TileData.StartingUnit.None)
+        {
+            tex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Units/{tile.startingUnit}{tile.startingUnitPlayer}-1.png").texture;
+        }
 
         return tex;
     }

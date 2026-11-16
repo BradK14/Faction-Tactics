@@ -20,7 +20,7 @@ public class TileData
     public enum StartingStructure { None, Base, SmallBase, BasicProduction, AdvProduction, Wall, StaticDefense }
     public StartingStructure startingStructure;
     public int startingStructurePlayer = 1;
-    public enum StartingUnit { None, Builder, Fighter, Scout, Supporter, Harasser, Destroyer, Powerhouse }
+    public enum StartingUnit { None, Builder, Fighter, Scout, Support, Harasser, Destroyer, Powerhouse }
     public StartingUnit startingUnit;
     public int startingUnitPlayer = 1;
 }
