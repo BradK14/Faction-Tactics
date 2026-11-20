@@ -100,14 +100,14 @@ public class MapDesigner : EditorWindow
 
                 // Draw each layer of the preview
                 // Terrain layer
-                Texture2D groundTex = getGroundTexFromTile(mapData.tiles[index]);
+                Texture2D groundTex = GetGroundTexFromTile(mapData.tiles[index]);
                 if (groundTex != null)
                 {
                     GUI.DrawTexture(tileRect, groundTex, ScaleMode.ScaleToFit, true);
                 }
 
                 // Cliff layer
-                Texture2D cliffTex = getCliffTexFromTile(mapData.tiles[index]);
+                Texture2D cliffTex = GetCliffTexFromTile(mapData.tiles[index]);
                 if (cliffTex != null)
                 {
                     GUI.DrawTexture(tileRect, cliffTex, ScaleMode.ScaleToFit, true);
@@ -115,7 +115,7 @@ public class MapDesigner : EditorWindow
 
                 // Resource layer
                 
-                Texture2D resourceTex = getResourceTexFromTile(mapData.tiles[index]);
+                Texture2D resourceTex = GetResourceTexFromTile(mapData.tiles[index]);
                 if (resourceTex != null)
                 {
                     GUI.DrawTexture(tileRect, resourceTex, ScaleMode.ScaleToFit, true);
@@ -123,14 +123,14 @@ public class MapDesigner : EditorWindow
                 
 
                 // Structure layer
-                Texture2D structureTex = getStructureTexFromTile(mapData.tiles[index]);
+                Texture2D structureTex = GetStructureTexFromTile(mapData.tiles[index]);
                 if (structureTex != null)
                 {
                     GUI.DrawTexture(tileRect, structureTex, ScaleMode.ScaleToFit, true);
                 }
 
                 // Unit layer
-                Texture2D unitTex = getUnitTexFromTile(mapData.tiles[index]);
+                Texture2D unitTex = GetUnitTexFromTile(mapData.tiles[index]);
                 if (unitTex != null)
                 {
                     GUI.DrawTexture(tileRect, unitTex, ScaleMode.ScaleToFit, true);
@@ -201,7 +201,7 @@ public class MapDesigner : EditorWindow
         EditorGUILayout.EndHorizontal();
     }
 
-    private Texture2D getGroundTexFromTile(TileData tile)
+    private Texture2D GetGroundTexFromTile(TileData tile)
     {
         Texture2D tex = null;
 
@@ -210,9 +210,10 @@ public class MapDesigner : EditorWindow
         return tex;
     }
 
-    private Texture2D getCliffTexFromTile(TileData tile)
+    private Texture2D GetCliffTexFromTile(TileData tile)
     {
         Texture2D tex = null;
+
         string n = (tile.cliffNorth) ? "N" : "";
         string e = (tile.cliffEast) ? "E" : "";
         string s = (tile.cliffSouth) ? "S" : "";
@@ -227,16 +228,19 @@ public class MapDesigner : EditorWindow
         return tex;
     }
 
-    private Texture2D getResourceTexFromTile(TileData tile)
+    private Texture2D GetResourceTexFromTile(TileData tile)
     {
         Texture2D tex = null;
 
-        // TODO: Load the correct texture
+        if (tile.resourceType != TileData.ResourceType.None)
+        {
+            tex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Terrain/{tile.resourceType}Resource.png").texture;
+        }
 
         return tex;
     }
 
-    private Texture2D getStructureTexFromTile(TileData tile)
+    private Texture2D GetStructureTexFromTile(TileData tile)
     {
         Texture2D tex = null;
 
@@ -248,7 +252,7 @@ public class MapDesigner : EditorWindow
         return tex;
     }
 
-    private Texture2D getUnitTexFromTile(TileData tile)
+    private Texture2D GetUnitTexFromTile(TileData tile)
     {
         Texture2D tex = null;
 
