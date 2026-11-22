@@ -7,7 +7,7 @@ public class MapDesigner : EditorWindow
 {
     private MapData mapData;
     private Vector2 scrollPosition;
-    private int selectedIndex = -1;  // TODO: Change this to a list
+    private List<int> selectedIndeces = new();
     private string mapName = "NewMapDesign";
     private int mapHeight = 10;
     private int mapWidth = 10;
@@ -75,7 +75,6 @@ public class MapDesigner : EditorWindow
 
         // LEFT SIDE: Draw the Visual Grid Selection Matrix
         EditorGUILayout.BeginVertical(GUILayout.Width(900));
-        GUILayout.Label("Click a tile to edit its properties:", EditorStyles.miniLabel);
 
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(900));
 
@@ -138,7 +137,7 @@ public class MapDesigner : EditorWindow
 
                 // Selection highlight layer
                 Texture2D highlightTex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Other/GameCursor.png").texture;
-                if (selectedIndex == index)  // TODO: Change this to check if it exists in a list
+                if (selectedIndeces.Contains(index))
                 {
                     GUI.DrawTexture(tileRect, highlightTex, ScaleMode.ScaleToFit, true);
                 }
@@ -149,12 +148,14 @@ public class MapDesigner : EditorWindow
                 {
                     if (e.button == 1)
                     {
-                        selectedIndex = -1;  // TODO: Change this to clear the list
+                        selectedIndeces.Clear();
+                        GUI.FocusControl(null);
                         e.Use();
                     }
-                    else if (e.button == 0 && tileRect.Contains(e.mousePosition))
+                    else if (e.button == 0 && tileRect.Contains(e.mousePosition) && !selectedIndeces.Contains(index))
                     {
-                        selectedIndex = index;  // TODO: Change this to add to the list
+                        selectedIndeces.Add(index);
+                        GUI.FocusControl(null);
                         e.Use();
                     }
                 }
@@ -166,10 +167,9 @@ public class MapDesigner : EditorWindow
 
         // RIGHT SIDE: Render the Form Fields for the Selected Tile
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-        if (selectedIndex >= 0 && selectedIndex < mapData.tiles.Count)  // TODO: Change this to see if there is anything in the list
+        if (selectedIndeces.Count == 1)
         {
-            // TODO: Change this to allow changing values to all selected tiles at once
-            TileData tile = mapData.tiles[selectedIndex];
+            TileData tile = mapData.tiles[selectedIndeces[0]];
             GUILayout.Label($"Editing Tile ({tile.x}, {tile.y})", EditorStyles.boldLabel);
             tile.elevation = EditorGUILayout.IntField("Elevation", tile.elevation);
             tile.elevation = Mathf.Clamp(tile.elevation, 1, 5);
@@ -202,9 +202,115 @@ public class MapDesigner : EditorWindow
             // Mark object dirty so Unity updates changes automatically
             EditorUtility.SetDirty(mapData);
         }
+        else if (selectedIndeces.Count > 0)
+        {
+            TileData tile = mapData.tiles[selectedIndeces[0]];  // First tile used as an example
+            string tileCoordinates = "";
+            foreach (int ind in selectedIndeces)
+                tileCoordinates += "(" + mapData.tiles[ind].x + "," + mapData.tiles[ind].y + ")";
+            GUILayout.Label($"Editing Selected Tiles: {tileCoordinates}", EditorStyles.boldLabel);
+
+            // Elevation
+            int elevation;
+            EditorGUI.BeginChangeCheck();
+            elevation = Mathf.Clamp(EditorGUILayout.IntField("Elevation", 0), 1, 5);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].elevation = elevation;
+            }
+
+            // Cliff North
+            EditorGUI.BeginChangeCheck();
+            tile.cliffNorth = EditorGUILayout.Toggle("Cliff North", tile.cliffNorth);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].cliffNorth = tile.cliffNorth;
+            }
+
+            // Cliff East
+            EditorGUI.BeginChangeCheck();
+            tile.cliffEast = EditorGUILayout.Toggle("Cliff East", tile.cliffEast);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].cliffEast = tile.cliffEast;
+            }
+
+            // Cliff South
+            EditorGUI.BeginChangeCheck();
+            tile.cliffSouth = EditorGUILayout.Toggle("Cliff South", tile.cliffSouth);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].cliffSouth = tile.cliffSouth;
+            }
+
+            // Cliff West
+            EditorGUI.BeginChangeCheck();
+            tile.cliffWest = EditorGUILayout.Toggle("Cliff West", tile.cliffWest);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].cliffWest = tile.cliffWest;
+            }
+
+            // Resource Type
+            EditorGUI.BeginChangeCheck();
+            tile.resourceType = (TileData.ResourceType)EditorGUILayout.EnumPopup("Resource Type", tile.resourceType);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].resourceType = tile.resourceType;
+            }
+
+            // Starting Structure
+            EditorGUI.BeginChangeCheck();
+            tile.startingStructure = (TileData.StartingStructure)EditorGUILayout.EnumPopup("Structure", tile.startingStructure);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].startingStructure = tile.startingStructure;
+            }
+
+            // Starting Structure Player
+            EditorGUI.indentLevel++;
+            EditorGUI.BeginChangeCheck();
+            tile.startingStructurePlayer = Mathf.Clamp(EditorGUILayout.IntField("Player:", tile.startingStructurePlayer), 1, 2);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].startingStructurePlayer = tile.startingStructurePlayer;
+            }
+            EditorGUI.indentLevel--;
+
+
+            // Starting Unit
+            EditorGUI.BeginChangeCheck();
+            tile.startingUnit = (TileData.StartingUnit)EditorGUILayout.EnumPopup("Unit", tile.startingUnit);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].startingUnit = tile.startingUnit;
+            }
+
+            EditorGUI.indentLevel++;
+            EditorGUI.BeginChangeCheck();
+            tile.startingUnitPlayer = Mathf.Clamp(EditorGUILayout.IntField("Player:", tile.startingUnitPlayer), 1, 2);
+            if (EditorGUI.EndChangeCheck())
+            {
+                foreach (int ind in selectedIndeces)
+                    mapData.tiles[ind].startingUnitPlayer = tile.startingUnitPlayer;
+            }
+            EditorGUI.indentLevel--;
+
+            // Mark object dirty so Unity updates changes automatically
+            EditorUtility.SetDirty(mapData);
+        }
         else
         {
-            GUILayout.Label("Select a tile on the map to configure properties.");
+            GUILayout.Label("Select tiles on the map to configure their properties.");
         }
         EditorGUILayout.EndVertical();
 
