@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Collections.Generic;
 
 public class MapDesigner : EditorWindow
 {
     private MapData mapData;
     private Vector2 scrollPosition;
-    private int selectedIndex = -1;
+    private int selectedIndex = -1;  // TODO: Change this to a list
     private string mapName = "NewMapDesign";
     private int mapHeight = 10;
     private int mapWidth = 10;
@@ -114,7 +115,6 @@ public class MapDesigner : EditorWindow
                 }
 
                 // Resource layer
-                
                 Texture2D resourceTex = GetResourceTexFromTile(mapData.tiles[index]);
                 if (resourceTex != null)
                 {
@@ -138,17 +138,26 @@ public class MapDesigner : EditorWindow
 
                 // Selection highlight layer
                 Texture2D highlightTex = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Images/Other/GameCursor.png").texture;
-                if (selectedIndex == index)
+                if (selectedIndex == index)  // TODO: Change this to check if it exists in a list
                 {
                     GUI.DrawTexture(tileRect, highlightTex, ScaleMode.ScaleToFit, true);
                 }
 
-                // Button Selection
-                if (GUI.Button(tileRect, GUIContent.none, GUIStyle.none))
+                // Tile Selection
+                Event e = Event.current;
+                if ((e.type == EventType.MouseDrag || e.type == EventType.MouseDown))
                 {
-                    selectedIndex = index;
+                    if (e.button == 1)
+                    {
+                        selectedIndex = -1;  // TODO: Change this to clear the list
+                        e.Use();
+                    }
+                    else if (e.button == 0 && tileRect.Contains(e.mousePosition))
+                    {
+                        selectedIndex = index;  // TODO: Change this to add to the list
+                        e.Use();
+                    }
                 }
-                
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -157,8 +166,9 @@ public class MapDesigner : EditorWindow
 
         // RIGHT SIDE: Render the Form Fields for the Selected Tile
         EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-        if (selectedIndex >= 0 && selectedIndex < mapData.tiles.Count)
+        if (selectedIndex >= 0 && selectedIndex < mapData.tiles.Count)  // TODO: Change this to see if there is anything in the list
         {
+            // TODO: Change this to allow changing values to all selected tiles at once
             TileData tile = mapData.tiles[selectedIndex];
             GUILayout.Label($"Editing Tile ({tile.x}, {tile.y})", EditorStyles.boldLabel);
             tile.elevation = EditorGUILayout.IntField("Elevation", tile.elevation);
