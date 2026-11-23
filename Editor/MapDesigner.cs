@@ -188,6 +188,10 @@ public class MapDesigner : EditorWindow
 
                 EditorGUI.indentLevel--;
             }
+            else
+            {
+                tile.startingStructurePlayer = 1;
+            }
             tile.startingUnit = (TileData.StartingUnit)EditorGUILayout.EnumPopup("Unit", tile.startingUnit);
             if (tile.startingUnit != TileData.StartingUnit.None)
             {
@@ -198,112 +202,181 @@ public class MapDesigner : EditorWindow
 
                 EditorGUI.indentLevel--;
             }
+            else
+            {
+                tile.startingUnitPlayer = 1;
+            }
 
             // Mark object dirty so Unity updates changes automatically
             EditorUtility.SetDirty(mapData);
         }
         else if (selectedIndeces.Count > 0)
         {
-            TileData tile = mapData.tiles[selectedIndeces[0]];  // First tile used as an example
+            TileData tile = mapData.tiles[selectedIndeces[0]];  // First tile used as an example in input fields
+            TileData prevTile = tile;  // This is only used in the next loop for checking for multiple values
             string tileCoordinates = "";
+            bool multElevation = false;
+            bool multCN = false;
+            bool multCE = false;
+            bool multCS = false;
+            bool multCW = false;
+            bool multResourceType = false;
+            bool multStructure = false;
+            bool multStructurePlayer = false;
+            bool multUnit = false;
+            bool multUnitPlayer = false;
+            bool anyStructures = false;
+            bool anyUnits = false;
             foreach (int ind in selectedIndeces)
-                tileCoordinates += "(" + mapData.tiles[ind].x + "," + mapData.tiles[ind].y + ")";
-            GUILayout.Label($"Editing Selected Tiles: {tileCoordinates}", EditorStyles.boldLabel);
+            {
+                TileData t = mapData.tiles[ind];
+                tileCoordinates += "(" + t.x + "," + t.y + ")";
+
+                // Check for multiple different types of each map element across selected tiles
+                if (t.elevation != prevTile.elevation) multElevation = true;
+                if (t.cliffNorth != prevTile.cliffNorth) multCN = true;
+                if (t.cliffEast != prevTile.cliffEast) multCE = true;
+                if (t.cliffSouth != prevTile.cliffSouth) multCS = true;
+                if (t.cliffWest != prevTile.cliffWest) multCW = true;
+                if (t.resourceType != prevTile.resourceType) multResourceType = true;
+                if (t.startingStructure != prevTile.startingStructure) multStructure = true;
+                if (t.startingStructurePlayer != prevTile.startingStructurePlayer) multStructurePlayer = true;
+                if (t.startingUnit != prevTile.startingUnit) multUnit = true;
+                if (t.startingUnitPlayer != prevTile.startingUnitPlayer) multUnitPlayer = true;
+                if (t.startingStructure != TileData.StartingStructure.None) anyStructures = true;
+                if (t.startingUnit != TileData.StartingUnit.None) anyUnits = true;
+
+                prevTile = t;
+            }
+            GUILayout.Label($"Editing Selected Tiles: {tileCoordinates}", EditorStyles.boldLabel);  // Display coordinates of all selected tiles
 
             // Elevation
-            int elevation;
+            if (multElevation) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            elevation = Mathf.Clamp(EditorGUILayout.IntField("Elevation", 0), 1, 5);
+            int elevation = Mathf.Clamp(EditorGUILayout.IntField("Elevation", tile.elevation), 1, 5);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
                     mapData.tiles[ind].elevation = elevation;
             }
+            EditorGUI.showMixedValue = false;
 
             // Cliff North
+            if (multCN) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.cliffNorth = EditorGUILayout.Toggle("Cliff North", tile.cliffNorth);
+            bool cliffNorth = EditorGUILayout.Toggle("Cliff North", tile.cliffNorth);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].cliffNorth = tile.cliffNorth;
+                    mapData.tiles[ind].cliffNorth = cliffNorth;
             }
+            EditorGUI.showMixedValue = false;
 
             // Cliff East
+            if (multCE) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.cliffEast = EditorGUILayout.Toggle("Cliff East", tile.cliffEast);
+            bool cliffEast = EditorGUILayout.Toggle("Cliff East", tile.cliffEast);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].cliffEast = tile.cliffEast;
+                    mapData.tiles[ind].cliffEast = cliffEast;
             }
+            EditorGUI.showMixedValue = false;
 
             // Cliff South
+            if (multCS) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.cliffSouth = EditorGUILayout.Toggle("Cliff South", tile.cliffSouth);
+            bool cliffSouth = EditorGUILayout.Toggle("Cliff South", tile.cliffSouth);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].cliffSouth = tile.cliffSouth;
+                    mapData.tiles[ind].cliffSouth = cliffSouth;
             }
+            EditorGUI.showMixedValue = false;
 
             // Cliff West
+            if (multCW) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.cliffWest = EditorGUILayout.Toggle("Cliff West", tile.cliffWest);
+            bool cliffWest = EditorGUILayout.Toggle("Cliff West", tile.cliffWest);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].cliffWest = tile.cliffWest;
+                    mapData.tiles[ind].cliffWest = cliffWest;
             }
+            EditorGUI.showMixedValue = false;
 
             // Resource Type
+            if (multResourceType) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.resourceType = (TileData.ResourceType)EditorGUILayout.EnumPopup("Resource Type", tile.resourceType);
+            TileData.ResourceType resourceType = (TileData.ResourceType)EditorGUILayout.EnumPopup("Resource Type", tile.resourceType);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].resourceType = tile.resourceType;
+                    mapData.tiles[ind].resourceType = resourceType;
             }
+            EditorGUI.showMixedValue = false;
 
             // Starting Structure
+            if (multStructure) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.startingStructure = (TileData.StartingStructure)EditorGUILayout.EnumPopup("Structure", tile.startingStructure);
+            TileData.StartingStructure startingStructure = (TileData.StartingStructure)EditorGUILayout.EnumPopup("Structure", tile.startingStructure);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].startingStructure = tile.startingStructure;
+                {
+                    mapData.tiles[ind].startingStructure = startingStructure;
+                    if (startingStructure == TileData.StartingStructure.None) mapData.tiles[ind].startingStructurePlayer = 1;
+                }
+                    
             }
+            EditorGUI.showMixedValue = false;
 
             // Starting Structure Player
-            EditorGUI.indentLevel++;
-            EditorGUI.BeginChangeCheck();
-            tile.startingStructurePlayer = Mathf.Clamp(EditorGUILayout.IntField("Player:", tile.startingStructurePlayer), 1, 2);
-            if (EditorGUI.EndChangeCheck())
+            if (anyStructures)
             {
-                foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].startingStructurePlayer = tile.startingStructurePlayer;
+                EditorGUI.indentLevel++;
+                if (multStructurePlayer) EditorGUI.showMixedValue = true;
+                EditorGUI.BeginChangeCheck();
+                int startingStructurePlayer = Mathf.Clamp(EditorGUILayout.IntField("Player:", tile.startingStructurePlayer), 1, 2);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    foreach (int ind in selectedIndeces)
+                        mapData.tiles[ind].startingStructurePlayer = startingStructurePlayer;
+                }
+                EditorGUI.showMixedValue = false;
+                EditorGUI.indentLevel--;
             }
-            EditorGUI.indentLevel--;
-
 
             // Starting Unit
+            if (multUnit) EditorGUI.showMixedValue = true;
             EditorGUI.BeginChangeCheck();
-            tile.startingUnit = (TileData.StartingUnit)EditorGUILayout.EnumPopup("Unit", tile.startingUnit);
+            TileData.StartingUnit startingUnit = (TileData.StartingUnit)EditorGUILayout.EnumPopup("Unit", tile.startingUnit);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].startingUnit = tile.startingUnit;
+                {
+                    mapData.tiles[ind].startingUnit = startingUnit;
+                    if (startingUnit == TileData.StartingUnit.None) mapData.tiles[ind].startingUnitPlayer = 1;
+                }
+                    
             }
+            EditorGUI.showMixedValue = false;
 
-            EditorGUI.indentLevel++;
-            EditorGUI.BeginChangeCheck();
-            tile.startingUnitPlayer = Mathf.Clamp(EditorGUILayout.IntField("Player:", tile.startingUnitPlayer), 1, 2);
-            if (EditorGUI.EndChangeCheck())
+            // Starting Unit Player
+            if (anyUnits)
             {
-                foreach (int ind in selectedIndeces)
-                    mapData.tiles[ind].startingUnitPlayer = tile.startingUnitPlayer;
+                EditorGUI.indentLevel++;
+                if (multUnitPlayer) EditorGUI.showMixedValue = true;
+                EditorGUI.BeginChangeCheck();
+                int startingUnitPlayer = Mathf.Clamp(EditorGUILayout.IntField("Player:", tile.startingUnitPlayer), 1, 2);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    foreach (int ind in selectedIndeces)
+                        mapData.tiles[ind].startingUnitPlayer = startingUnitPlayer;
+                }
+                EditorGUI.showMixedValue = false;
+                EditorGUI.indentLevel--;
             }
-            EditorGUI.indentLevel--;
 
             // Mark object dirty so Unity updates changes automatically
             EditorUtility.SetDirty(mapData);
