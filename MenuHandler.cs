@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Collections;
@@ -30,6 +32,11 @@ public class MenuHandler : MonoBehaviour
     // Start function
     private void Start()
     {
+        // Set up
+        List<string> mapOptions = Directory.EnumerateFiles("Assets/ScriptableObjects", "*.asset").Select(Path.GetFileNameWithoutExtension).ToList();
+        mapDropdown.AddOptions(mapOptions);
+
+        // Show the title menu
         titleMenu.SetActive(true);
     }
 
@@ -100,9 +107,12 @@ public class MenuHandler : MonoBehaviour
 
     public void CreateButton()
     {
-        createSessionMenu.SetActive(false);
+        if (!string.IsNullOrWhiteSpace(sessionNameInput.text))
+        {
+            createSessionMenu.SetActive(false);
 
-        _ = CreateSessionAsync();
+            _ = CreateSessionAsync();
+        }
     }
 
     public void JoinButton()
