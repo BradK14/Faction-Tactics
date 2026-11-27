@@ -1,10 +1,13 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Services.Multiplayer;
+using System.Linq;
 
 public class GameManager : NetworkBehaviour
 {
     // Variables
     [SerializeField] private GameObject loadOverlay;
+    private ISession session;
 
     // Functions
     private void Start()
@@ -30,8 +33,29 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    // Server only function to organize and communicate starting information for all clients
     private async void LoadScene()
     {
+        // Get session info
+        session = MultiplayerService.Instance.Sessions.Values.FirstOrDefault();
+        if (session != null)
+        {
+            Debug.Log($"Session Name: {session.Name}");
+            Debug.Log($"Session ID: {session.Id}");
+            Debug.Log($"Join Code: {session.Code}");
+            Debug.Log($"Players: {session.PlayerCount} / {session.MaxPlayers}");
+
+            if (session.Properties.TryGetValue("Map", out SessionProperty m))
+            {
+                Debug.Log($"Map: {m.Value}");
+            }
+
+            if (session.Properties.TryGetValue("Timer", out SessionProperty t))
+            {
+                Debug.Log($"Timer: {t.Value}");
+            }
+        }
+
         // Map
         // Delay to test
         await Awaitable.WaitForSecondsAsync(5.0f);
